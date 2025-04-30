@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
-from models.quantum_model import create_qnode
-from utils import generate_graph_data
+from model.quantum_model import create_qnode
+from data_gen import generate_graph_data
 
 # Config
 n_graphs = 200
