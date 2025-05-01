@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
+import matplotlib.pyplot as plt
+
 from models.quantum_model import create_qnode
 from data_gen import generate_graph_data
-import matplotlib.pyplot as plt
 
 # Config
 n_graphs = 200
@@ -13,7 +14,7 @@ n_layers = 3
 learning_rate = 0.1
 epochs = 20
 variational_ansatz = "rx"  # or "rx_ry"
-use_param_encoding = False
+use_encoding_param = False
 
 # Data
 graphs, labels = generate_graph_data(n_graphs, n_nodes)
@@ -24,7 +25,7 @@ dataset = TensorDataset(X, y)
 loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 # Model setup
-qnode = create_qnode(n_nodes, L=n_layers, variational_ansatz=variational_ansatz, use_param_encoding=use_param_encoding)
+qnode = create_qnode(n_nodes, L=n_layers, variational_ansatz=variational_ansatz, use_param_encoding=use_encoding_param)
 
 # Parameters
 if variational_ansatz == "rx":
@@ -32,7 +33,7 @@ if variational_ansatz == "rx":
 elif variational_ansatz == "rx_ry":
     thetas = torch.nn.Parameter(torch.randn(n_layers, 2, requires_grad=True))
 
-if use_param_encoding:
+if use_encoding_param:
     gammas = torch.nn.Parameter(torch.ones(n_layers, requires_grad=True))
 else:
     gammas = None
