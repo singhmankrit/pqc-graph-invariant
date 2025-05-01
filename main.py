@@ -25,7 +25,12 @@ dataset = TensorDataset(X, y)
 loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
 # Model setup
-qnode = create_qnode(n_nodes, L=n_layers, variational_ansatz=variational_ansatz, use_param_encoding=use_encoding_param)
+qnode = create_qnode(
+    n_nodes,
+    depth=n_layers,
+    variational_ansatz=variational_ansatz,
+    use_encoding_param=use_encoding_param,
+)
 
 # Parameters
 if variational_ansatz == "rx":
@@ -38,7 +43,9 @@ if use_encoding_param:
 else:
     gammas = None
 
-optimizer = torch.optim.Adam([thetas] + ([gammas] if gammas is not None else []), lr=learning_rate)
+optimizer = torch.optim.Adam(
+    [thetas] + ([gammas] if gammas is not None else []), lr=learning_rate
+)
 loss_fn = nn.BCELoss()
 
 loss_list = []
