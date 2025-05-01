@@ -2,6 +2,29 @@ import networkx as nx
 import numpy as np
 
 def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.5, seed=42):
+    """
+    Generate random graph data with labels for connectivity.
+
+    Parameters
+    ----------
+    n_graphs : int
+        Number of graphs to generate. Default is 100.
+    n_nodes : int
+        Number of nodes in the graph. Default is 4.
+    p_edge : float
+        Probability of an edge between two nodes. Default is 0.5.
+    seed : int
+        Random seed for generating graphs. Default is 42.
+
+    Returns
+    -------
+    graphs : np.ndarray
+        Array of shape (n_graphs, n_nodes, n_nodes) containing a list of the adjacency
+        matrices of the generated graphs.
+    labels : np.ndarray
+        Array of shape (n_graphs,) containing 0 if the graph is connected and 1
+        if it is not.
+    """
     np.random.seed(seed)
     graphs, labels = [], []
 
@@ -21,5 +44,5 @@ def load_data(filename='data/graph_data.npz'):
     data = np.load(filename)
     return data['graphs'], data['labels']
 
-graphs, labels =generate_graph_data()
+graphs, labels = generate_graph_data()
 save_data(graphs, labels)
