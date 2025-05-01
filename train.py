@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
-import numpy as np
 from model.quantum_model import create_qnode
 from data_gen import generate_graph_data
 
@@ -12,7 +11,7 @@ batch_size = 16
 n_layers = 3
 learning_rate = 0.1
 epochs = 20
-variational_ansatz = "rx_ry"  # or "rx"
+variational_ansatz = "rx"  # or "rx_ry"
 use_param_encoding = False
 
 # Data

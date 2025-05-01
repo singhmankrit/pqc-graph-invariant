@@ -2,6 +2,21 @@ import pennylane as qml
 from pennylane import numpy as np
 
 def get_ising_hamiltonian(adj_matrix):
+    """
+    As per Part 1a of the quantum model description, we need to use the Ising Hamiltonian to encode graphs into the quantum circuit.
+    This function returns the Ising Hamiltonian of the given graph.
+
+    Parameters
+    ----------
+    adj_matrix : np.ndarray
+        Adjacency matrix of the graph.
+
+    Returns
+    -------
+    H : qml.Hamiltonian
+        The Ising Hamiltonian of the given graph.
+
+    """
     n = len(adj_matrix)
     H = qml.Hamiltonian([], [])
 
@@ -20,8 +35,8 @@ def create_qnode(n_qubits, L=2, variational_ansatz="rx", use_param_encoding=Fals
         H = get_ising_hamiltonian(adj_matrix)
 
         for l in range(L):
-            γ = gammas[l] if use_param_encoding else 1.0
-            qml.ApproxTimeEvolution(H, γ, 1)
+            gamma = gammas[l] if use_param_encoding else 1.0
+            qml.ApproxTimeEvolution(H, gamma, 1)
 
             for i in range(n_qubits):
                 if variational_ansatz == "rx":
