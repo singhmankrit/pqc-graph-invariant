@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 
+
 def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.5, seed=42):
     """
     Generate random graph data with labels for connectivity.
@@ -37,12 +38,38 @@ def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.5, seed=42):
 
     return np.array(graphs), np.array(labels)
 
-def save_data(graphs, labels, filename='data/graph_data.npz'):
+
+def save_data(graphs, labels, filename="data/graph_data.npz"):
+    """
+    Save graph data and labels to a compressed .npz file.
+
+    Parameters
+    ----------
+    graphs : np.ndarray
+        Array of adjacency matrices representing the graphs to be saved.
+    labels : np.ndarray
+        Array of labels indicating the connectivity of each graph.
+    filename : str, optional
+        The path to the file where the data should be saved. Default is 'data/graph_data.npz'.
+    """
     np.savez_compressed(filename, graphs=graphs, labels=labels)
 
-def load_data(filename='data/graph_data.npz'):
-    data = np.load(filename)
-    return data['graphs'], data['labels']
 
-generated_graphs, generated_labels = generate_graph_data()
-save_data(generated_graphs, generated_labels)
+def load_data(filename="data/graph_data.npz"):
+    """
+    Load graph data and labels from a compressed .npz file.
+
+    Parameters
+    ----------
+    filename : str, optional
+        The path to the file where the data is stored. Default is 'data/graph_data.npz'.
+
+    Returns
+    -------
+    graphs : np.ndarray
+        Array of adjacency matrices representing the loaded graphs.
+    labels : np.ndarray
+        Array of labels indicating the connectivity of each loaded graph.
+    """
+    data = np.load(filename)
+    return data["graphs"], data["labels"]
