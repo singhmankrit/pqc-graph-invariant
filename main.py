@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 from model.quantum_model import create_qnode
 from data_gen import generate_graph_data
+import matplotlib.pyplot as plt
 
 # Config
 n_graphs = 200
@@ -39,20 +40,51 @@ else:
 optimizer = torch.optim.Adam([thetas] + ([gammas] if gammas is not None else []), lr=learning_rate)
 loss_fn = nn.BCELoss()
 
-# Training loop
+loss_list = []
+acc_list = []
+
 for epoch in range(epochs):
     total_loss = 0
+    correct = 0
+    total = 0
+
     for xb, yb in loader:
         preds = []
         for i in range(len(xb)):
             out = qnode(xb[i].detach().numpy(), thetas, gammas)
             preds.append(out)
 
-        preds = torch.sigmoid(torch.stack(preds).squeeze())
+        preds = torch.sigmoid(torch.stack(preds).squeeze()).float()
         loss = loss_fn(preds, yb)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        total_loss += loss.item()
 
-    print(f"Epoch {epoch+1:02d}: Loss = {total_loss/len(loader):.4f}")
+        total_loss += loss.item()
+        predicted_labels = (preds > 0.5).float()
+        correct += (predicted_labels == yb).sum().item()
+        total += len(yb)
+
+    avg_loss = total_loss / len(loader)
+    accuracy = correct / total
+    loss_list.append(avg_loss)
+    acc_list.append(accuracy)
+    print(f"Epoch {epoch+1:02d}: Loss = {avg_loss:.4f}, Accuracy = {accuracy:.4f}")
+
+# Plot
+plt.figure(figsize=(10, 4))
+plt.subplot(1, 2, 1)
+plt.plot(loss_list, label="Loss")
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.grid(True)
+
+plt.subplot(1, 2, 2)
+plt.plot(acc_list, label="Accuracy", color="green")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.ylim(0, 1)
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
