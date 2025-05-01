@@ -36,7 +36,7 @@ def create_qnode(n_qubits, L=2, variational_ansatz="rx", use_param_encoding=Fals
 
         for l in range(L):
             gamma = gammas[l] if use_param_encoding else 1.0
-            qml.ApproxTimeEvolution(H, gamma, 1)
+            qml.ApproxTimeEvolution(gamma*H, 1, 5)
 
             for i in range(n_qubits):
                 if variational_ansatz == "rx":

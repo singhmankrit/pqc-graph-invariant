@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
-from model.quantum_model import create_qnode
+from models.quantum_model import create_qnode
 from data_gen import generate_graph_data
 import matplotlib.pyplot as plt
 
