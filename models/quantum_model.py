@@ -1,42 +1,38 @@
 import pennylane as qml
-from pennylane import numpy as np
 
-def get_ising_hamiltonian(adj_matrix):
+def create_qnode(n_qubits, L=2, variational_ansatz="rx", use_encoding_param=False):
     """
-    As per Part 1a of the quantum model description, we need to use the Ising Hamiltonian to encode graphs into the quantum circuit.
-    This function returns the Ising Hamiltonian of the given graph.
+    Create a Pennylane QNode that implements the quantum circuit for
+    learning graph connectivity.
 
     Parameters
     ----------
-    adj_matrix : np.ndarray
-        Adjacency matrix of the graph.
+    n_qubits : int
+        Number of qubits in the circuit.
+    L : int, optional
+        Number of layers in the circuit. Default is 2.
+    variational_ansatz : str, optional
+        The type of variational ansatz to use in the circuit. Options are "rx" and "rx_ry". Default is "rx".
+    use_encoding_param : bool, optional
+        Whether to use the encoding parameter in the Ising Hamiltonian. Default is False.
 
     Returns
     -------
-    H : qml.Hamiltonian
-        The Ising Hamiltonian of the given graph.
-
+    qnode : function
+        A Pennylane QNode that implements the quantum circuit.
     """
-    n = len(adj_matrix)
-    H = qml.Hamiltonian([], [])
-
-    for i in range(n):
-        for j in range(i+1, n):
-            if adj_matrix[i, j] == 1:
-                H += qml.Hamiltonian([1.0], [qml.PauliZ(i) @ qml.PauliZ(j)])
-
-    return H
-
-def create_qnode(n_qubits, L=2, variational_ansatz="rx", use_param_encoding=False):
     dev = qml.device("default.qubit", wires=n_qubits)
 
-    @qml.qnode(dev, interface="torch")
+    @qml.qnode(dev)
     def circuit(adj_matrix, thetas, gammas=None):
-        H = get_ising_hamiltonian(adj_matrix)
-
         for l in range(L):
-            gamma = gammas[l] if use_param_encoding else 1.0
-            qml.ApproxTimeEvolution(gamma*H, 1, 5)
+            gamma = gammas[l] if use_encoding_param else 1.0
+
+            # we can directly use IsingZZ for each edge because the individual Hamiltonians in the sum commute with each other
+            for i in range(len(adj_matrix)):
+                for j in range(i+1, len(adj_matrix)):
+                    if adj_matrix[i, j] == 1:
+                        qml.IsingZZ(2*gamma, wires=[i, j]) # because 2*gamma will be divided by 2 in the exponent
 
             for i in range(n_qubits):
                 if variational_ansatz == "rx":
