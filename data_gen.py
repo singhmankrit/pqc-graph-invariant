@@ -44,5 +44,5 @@ def load_data(filename='data/graph_data.npz'):
     data = np.load(filename)
     return data['graphs'], data['labels']
 
-graphs, labels = generate_graph_data()
-save_data(graphs, labels)
+generated_graphs, generated_labels = generate_graph_data()
+save_data(generated_graphs, generated_labels)
