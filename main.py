@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
+import pennylane as qml
 
 import utils
 from models.quantum_model import create_qnode
@@ -44,6 +45,16 @@ if use_encoding_param:
     gammas = torch.nn.Parameter(torch.ones(n_layers, requires_grad=True))
 else:
     gammas = None
+
+# Just visualising the circuit
+adj_matrix_sample = graphs[0]
+if use_encoding_param:
+    gammas_sample = gammas.detach()
+else:
+    gammas_sample = None
+
+qml.draw_mpl(qnode)(adj_matrix_sample, thetas, gammas_sample)
+plt.savefig("circuit.png")
 
 optimizer = torch.optim.Adam(
     [thetas] + ([gammas] if gammas is not None else []), lr=learning_rate
@@ -97,4 +108,4 @@ plt.ylim(0, 1)
 plt.grid(True)
 
 plt.tight_layout()
-plt.show()
+plt.savefig("plots.png")

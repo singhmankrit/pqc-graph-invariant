@@ -3,6 +3,22 @@ from typing import Any
 
 
 def parse_config(file_path: str):
+    """
+    Parse a configuration file and return the configuration parameters.
+
+    Parameters
+    ----------
+    file_path : str
+        The path to the configuration file.
+
+    Returns
+    -------
+    tuple
+        A tuple of the configuration parameters in the following order:
+        n_graphs, n_nodes, batch_size, n_layers, learning_rate, epochs,
+        variational_ansatz, use_encoding_param
+    """
+
     with open(file_path) as file:
         config: dict[str, Any] = json.load(file)
         n_graphs: int = config.get("n_graphs", 200)
@@ -21,5 +37,5 @@ def parse_config(file_path: str):
             learning_rate,
             epochs,
             variational_ansatz,
-            use_encoding_param
+            use_encoding_param,
         )
