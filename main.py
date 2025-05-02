@@ -3,18 +3,20 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
 
+import utils
 from models.quantum_model import create_qnode
-from data_gen import generate_graph_data
+from data.data_gen import generate_graph_data
 
-# Config
-n_graphs = 200
-n_nodes = 4
-batch_size = 16
-n_layers = 3
-learning_rate = 0.1
-epochs = 20
-variational_ansatz = "rx"  # or "rx_ry"
-use_encoding_param = False
+(
+    n_graphs,
+    n_nodes,
+    batch_size,
+    n_layers,
+    learning_rate,
+    epochs,
+    variational_ansatz,
+    use_encoding_param,
+) = utils.parse_config("config.json")
 
 # Data
 graphs, labels = generate_graph_data(n_graphs, n_nodes)
