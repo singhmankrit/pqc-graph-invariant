@@ -25,7 +25,7 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
     """
     dev = qml.device("default.qubit", wires=n_qubits)
 
-    @qml.qnode(dev)
+    @qml.qnode(dev, interface="torch")
     def circuit(adj_matrix, thetas, gammas=None):
         """
         This function implements the quantum circuit for learning graph connectivity
@@ -62,7 +62,10 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
                 elif variational_ansatz == "rx_ry":
                     qml.RX(thetas[l][0], wires=i)
                     qml.RY(thetas[l][1], wires=i)
-
-        return qml.expval(qml.PauliZ(0))
+        
+        operator = qml.PauliZ(0)
+        for i in range(1, n_qubits):
+            operator = operator @ qml.PauliZ(i)
+        return qml.expval(operator)
 
     return circuit
