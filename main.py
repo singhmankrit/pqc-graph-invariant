@@ -1,5 +1,4 @@
 import torch
-from torch.utils.data import TensorDataset, DataLoader
 
 import utils, plots
 from models.classical_model import train_polynomial_model
@@ -38,8 +37,6 @@ else:
 if ml_model == "quantum":
     X = torch.tensor(graphs, dtype=torch.float32)
     y = torch.tensor(labels, dtype=torch.float32)
-    dataset = TensorDataset(X, y)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     # Quantum Model Parameters
     if variational_ansatz == "rx":
@@ -64,14 +61,18 @@ if ml_model == "quantum":
         use_encoding_param=use_encoding_param,
     )
 
-    train_quantum_model(qnode, thetas, gammas, learning_rate, epochs, loader)
+    train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size)
 
     # plots.plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param)
 
 elif ml_model == "classical":
-    X = torch.tensor(graphs, dtype=torch.float32).reshape(len(graphs), -1)  # flatten adjacency matrices
+    X = torch.tensor(graphs, dtype=torch.float32).reshape(
+        len(graphs), -1
+    )  # flatten adjacency matrices
     y = torch.tensor(labels, dtype=torch.float32)
-    model = train_polynomial_model(X, y, degree=n_layers, epochs=epochs, lr=learning_rate, batch_size=batch_size)
+    model = train_polynomial_model(
+        X, y, degree=n_layers, epochs=epochs, lr=learning_rate, batch_size=batch_size
+    )
 
 else:
     raise ValueError(f"Invalid ML model: {ml_model}")
