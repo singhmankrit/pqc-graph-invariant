@@ -6,8 +6,9 @@ from models.quantum_model import create_qnode, train_quantum_model
 from data.data_gen import generate_graph_data
 
 (
+    generate_data,
     n_graphs,
-    n_nodes,
+    n_nodes, # used only when generating new graph data
     batch_size,
     n_layers,
     learning_rate,
@@ -17,7 +18,15 @@ from data.data_gen import generate_graph_data
 ) = utils.parse_config("config.json")
 
 # Data
-graphs, labels = generate_graph_data(n_graphs, n_nodes)
+if generate_data:
+    graphs, labels = generate_graph_data(n_graphs, n_nodes)
+else:
+    graphs, labels = utils.load_data("graph_data.npz")
+    if graphs.shape[0] != n_graphs or labels.shape[0] != n_graphs:
+        raise ValueError(
+            f"Number of graphs in data ({graphs.shape[0]}) does not match n_graphs ({n_graphs})."
+        )
+
 X = torch.tensor(graphs, dtype=torch.float32)
 y = torch.tensor(labels, dtype=torch.float32)
 
