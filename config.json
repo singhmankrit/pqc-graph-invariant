@@ -4,9 +4,10 @@
 	"n_graphs": 200,
 	"n_nodes": 5,
 	"batch_size": 16,
-	"n_layers": 3,
 	"learning_rate": 0.1,
 	"epochs": 20,
+	"ml_model": "quantum",
+	"pqc_layers": 3,
 	"variational_ansatz": "rx",
 	"use_encoding_param": false
 }

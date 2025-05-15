@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 
 import utils, plots
+from models.classical_model import train_polynomial_model
 from models.quantum_model import create_qnode, train_quantum_model
 from data.data_gen import generate_graph_data, load_data, save_data
 
@@ -10,9 +11,11 @@ from data.data_gen import generate_graph_data, load_data, save_data
     n_graphs,
     n_nodes,
     batch_size,
-    n_layers,
     learning_rate,
     epochs,
+    ml_model,
+    # quantum model specific parameters
+    pqc_layers,
     variational_ansatz,
     use_encoding_param,
 ) = utils.parse_config("config.json")
@@ -32,35 +35,44 @@ else:
             f"Number of nodes in saved data ({load_n_nodes}) does not match config input n_nodes ({n_nodes})."
         )
 
-X = torch.tensor(graphs, dtype=torch.float32)
-y = torch.tensor(labels, dtype=torch.float32)
+if ml_model == "quantum":
+    X = torch.tensor(graphs, dtype=torch.float32)
+    y = torch.tensor(labels, dtype=torch.float32)
+    dataset = TensorDataset(X, y)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-dataset = TensorDataset(X, y)
-loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    # Quantum Model Parameters
+    if variational_ansatz == "rx":
+        thetas = torch.nn.Parameter(torch.randn(pqc_layers, requires_grad=True))
+    elif variational_ansatz == "rx_ry":
+        thetas = torch.nn.Parameter(torch.randn(pqc_layers, 2, requires_grad=True))
+    elif variational_ansatz == "rx_ry_rz":
+        thetas = torch.nn.Parameter(torch.randn(pqc_layers, 3, requires_grad=True))
+    else:
+        raise ValueError(f"Invalid variational ansatz: {variational_ansatz}")
 
-# Parameters
-if variational_ansatz == "rx":
-    thetas = torch.nn.Parameter(torch.randn(n_layers, requires_grad=True))
-elif variational_ansatz == "rx_ry":
-    thetas = torch.nn.Parameter(torch.randn(n_layers, 2, requires_grad=True))
-elif variational_ansatz == "rx_ry_rz":
-    thetas = torch.nn.Parameter(torch.randn(n_layers, 3, requires_grad=True))
+    if use_encoding_param:
+        gammas = torch.nn.Parameter(torch.ones(pqc_layers, requires_grad=True))
+    else:
+        gammas = None
+
+    # Model setup
+    qnode = create_qnode(
+        n_nodes,
+        depth=pqc_layers,
+        variational_ansatz=variational_ansatz,
+        use_encoding_param=use_encoding_param,
+    )
+
+    train_quantum_model(qnode, thetas, gammas, learning_rate, epochs, loader)
+
+    # plots.plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param)
+
+elif ml_model == "classical":
+    X = torch.tensor(graphs, dtype=torch.float32).reshape(len(graphs), -1)  # flatten adjacency matrices
+    y = torch.tensor(labels, dtype=torch.float32)
+    degree = 2  # or 3 for comparison with quantum circuit depth
+    model = train_polynomial_model(X, y, degree=degree, epochs=100)
+
 else:
-    raise ValueError(f"Invalid variational ansatz: {variational_ansatz}")
-
-if use_encoding_param:
-    gammas = torch.nn.Parameter(torch.ones(n_layers, requires_grad=True))
-else:
-    gammas = None
-
-# Model setup
-qnode = create_qnode(
-    n_nodes,
-    depth=n_layers,
-    variational_ansatz=variational_ansatz,
-    use_encoding_param=use_encoding_param,
-)
-
-train_quantum_model(qnode, thetas, gammas, learning_rate, epochs, loader)
-
-# plots.plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param)
+    raise ValueError(f"Invalid ML model: {ml_model}")
