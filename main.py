@@ -5,11 +5,12 @@ from models.quantum_model import create_qnode, train_quantum_model
 from utils import parse_config, generate_or_load_data
 
 config_list = parse_config("config.json")
+total_configs = len(config_list)
 
 # Store which Classical Configs run
 classical_configs_run = set()
 
-for config in config_list:
+for i, config in enumerate(config_list, 1):
     generate_data = config["generate_data"]
     n_graphs = config["n_graphs"]
     n_nodes = config["n_nodes"]
@@ -18,6 +19,8 @@ for config in config_list:
     n_layers = config["n_layers"]
     epochs = config["epochs"]
     ml_model = config["ml_model"]
+
+    print(f"\n[{i}/{total_configs}] Processing configuration: {config}")
 
     # Load data
     graphs, labels = generate_or_load_data(n_graphs, n_nodes, generate_data)
@@ -34,13 +37,11 @@ for config in config_list:
         )
 
         if classical_config_key in classical_configs_run:
-            print(f"Skipping duplicate classical model run with config: {config}")
+            print(f"Skipping duplicate classical model")
             continue
 
         classical_configs_run.add(classical_config_key)
 
-        # Run the classical model
-        print(f"\nRunning classical model with config: {config}")
         X = torch.tensor(graphs, dtype=torch.float32).reshape(len(graphs), -1)
         y = torch.tensor(labels, dtype=torch.float32)
 
@@ -58,7 +59,6 @@ for config in config_list:
         variational_ansatz = config.get("variational_ansatz")
         use_encoding_param = config.get("use_encoding_param")
 
-        print(f"\nRunning quantum model with config: {config}")
         X = torch.tensor(graphs, dtype=torch.float32)
         y = torch.tensor(labels, dtype=torch.float32)
 
