@@ -43,6 +43,10 @@ if variational_ansatz == "rx":
     thetas = torch.nn.Parameter(torch.randn(n_layers, requires_grad=True))
 elif variational_ansatz == "rx_ry":
     thetas = torch.nn.Parameter(torch.randn(n_layers, 2, requires_grad=True))
+elif variational_ansatz == "rx_ry_rz":
+    thetas = torch.nn.Parameter(torch.randn(n_layers, 3, requires_grad=True))
+else:
+    raise ValueError(f"Invalid variational ansatz: {variational_ansatz}")
 
 if use_encoding_param:
     gammas = torch.nn.Parameter(torch.ones(n_layers, requires_grad=True))
