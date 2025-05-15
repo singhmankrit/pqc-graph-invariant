@@ -8,7 +8,7 @@ from data.data_gen import generate_graph_data, load_data, save_data
 (
     generate_data,
     n_graphs,
-    n_nodes,  # used only when generating new graph data
+    n_nodes,
     batch_size,
     n_layers,
     learning_rate,
@@ -20,12 +20,16 @@ from data.data_gen import generate_graph_data, load_data, save_data
 # Data
 if generate_data:
     graphs, labels = generate_graph_data(n_graphs, n_nodes)
-    save_data(graphs, labels)
+    save_data(graphs, labels, n_nodes)
 else:
-    graphs, labels = load_data()
+    graphs, labels, load_n_nodes = load_data()
     if graphs.shape[0] != n_graphs or labels.shape[0] != n_graphs:
         raise ValueError(
             f"Number of graphs in saved data ({graphs.shape[0]}) does not match config input n_graphs ({n_graphs})."
+        )
+    if n_nodes != load_n_nodes:
+        raise ValueError(
+            f"Number of nodes in saved data ({load_n_nodes}) does not match config input n_nodes ({n_nodes})."
         )
 
 X = torch.tensor(graphs, dtype=torch.float32)

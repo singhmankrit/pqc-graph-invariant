@@ -39,7 +39,7 @@ def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.5, seed=42):
     return np.array(graphs), np.array(labels)
 
 
-def save_data(graphs, labels, filename="data/graph_data.npz"):
+def save_data(graphs, labels, n_nodes, filename="data/graph_data.npz"):
     """
     Save graph data and labels to a compressed .npz file.
 
@@ -49,10 +49,12 @@ def save_data(graphs, labels, filename="data/graph_data.npz"):
         Array of adjacency matrices representing the graphs to be saved.
     labels : np.ndarray
         Array of labels indicating the connectivity of each graph.
+    n_nodes : int
+        Number of nodes in generated graph.
     filename : str, optional
         The path to the file where the data should be saved. Default is 'graph_data.npz'.
     """
-    np.savez_compressed(filename, graphs=graphs, labels=labels)
+    np.savez_compressed(filename, graphs=graphs, labels=labels, n_nodes=n_nodes)
 
 
 def load_data(filename="data/graph_data.npz"):
@@ -70,6 +72,8 @@ def load_data(filename="data/graph_data.npz"):
         Array of adjacency matrices representing the loaded graphs.
     labels : np.ndarray
         Array of labels indicating the connectivity of each loaded graph.
+    n_nodes : int
+        Number of nodes in loaded graph.
     """
     data = np.load(filename)
-    return data["graphs"], data["labels"]
+    return data["graphs"], data["labels"], data["n_nodes"]
