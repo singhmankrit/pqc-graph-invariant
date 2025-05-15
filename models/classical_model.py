@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 
 import plots
 
+
 class PolynomialModel(nn.Module):
     def __init__(self, input_dim):
         super().__init__()
