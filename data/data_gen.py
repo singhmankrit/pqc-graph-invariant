@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 
 
-def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.5, seed=42):
+def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.35, seed=42):
     """
     Generate random graph data with labels for connectivity.
 
@@ -13,7 +13,7 @@ def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.5, seed=42):
     n_nodes : int
         Number of nodes in the graph. Default is 4.
     p_edge : float
-        Probability of an edge between two nodes. Default is 0.5.
+        Probability of an edge between two nodes. Default is 0.35 because otherwise the graphs are almost certainly connected for higher number of nodes.
     seed : int
         Random seed for generating graphs. Default is 42.
 

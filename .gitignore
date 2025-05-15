@@ -1,5 +1,6 @@
 __pycache__
-model/__pycache__
-data/graph_data.npz
+data/*.npz
+data/**/*.npz
 
+images/
 /*.png
