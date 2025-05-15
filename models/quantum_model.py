@@ -1,7 +1,7 @@
 import pennylane as qml
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset, DataLoader, random_split
 
 import plots
 
@@ -76,7 +76,6 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
         for i in range(1, n_qubits):
             operator = operator @ qml.PauliZ(i)
         return qml.expval(operator)
-        # return sum(qml.expval(qml.PauliZ(i)) for i in range(n_qubits)) / n_qubits
 
     return circuit
 
@@ -108,23 +107,33 @@ def train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batc
     -------
     None
     """
+
+    # --- Split into training and test sets
     dataset = TensorDataset(X, y)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    test_size = int(len(dataset) * 0.2)  # Test Split = 20%
+    train_size = len(dataset) - test_size
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
     optimizer = torch.optim.Adam(
         [thetas] + ([gammas] if gammas is not None else []), lr=learning_rate
     )
     loss_fn = nn.BCELoss()
 
-    loss_list = []
-    acc_list = []
+    train_loss_list = []
+    train_acc_list = []
+    test_loss_list = []
+    test_acc_list = []
 
     for epoch in range(epochs):
-        total_loss = 0
-        correct = 0
-        total = 0
+        # --- Training
+        total_train_loss = 0
+        correct_train = 0
+        total_train = 0
 
-        for xb, yb in loader:
+        for xb, yb in train_loader:
             preds = []
             for i in range(len(xb)):
                 out = qnode(xb[i].detach().numpy(), thetas, gammas)
@@ -136,15 +145,45 @@ def train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batc
             loss.backward()
             optimizer.step()
 
-            total_loss += loss.item()
+            total_train_loss += loss.item()
             predicted_labels = (preds > 0.5).float()
-            correct += (predicted_labels == yb).sum().item()
-            total += len(yb)
+            correct_train += (predicted_labels == yb).sum().item()
+            total_train += len(yb)
 
-        avg_loss = total_loss / len(loader)
-        accuracy = correct / total
-        loss_list.append(avg_loss)
-        acc_list.append(accuracy)
-        print(f"Epoch {epoch+1:02d}: Loss = {avg_loss:.4f}, Accuracy = {accuracy:.4f}")
+        avg_train_loss = total_train_loss / len(train_loader)
+        train_accuracy = correct_train / total_train
+        train_loss_list.append(avg_train_loss)
+        train_acc_list.append(train_accuracy)
 
-    plots.plot_loss_accuracy(loss_list, acc_list)
+        # --- Evaluation on test set
+        total_test_loss = 0
+        correct_test = 0
+        total_test = 0
+
+        with torch.no_grad():
+            for xb, yb in test_loader:
+                preds = []
+                for i in range(len(xb)):
+                    out = qnode(xb[i].detach().numpy(), thetas, gammas)
+                    preds.append(out)
+                preds = torch.sigmoid(torch.stack(preds).squeeze()).float()
+                loss = loss_fn(preds, yb)
+
+                total_test_loss += loss.item()
+                predicted_labels = (preds > 0.5).float()
+                correct_test += (predicted_labels == yb).sum().item()
+                total_test += len(yb)
+
+        avg_test_loss = total_test_loss / len(test_loader)
+        test_accuracy = correct_test / total_test
+        test_loss_list.append(avg_test_loss)
+        test_acc_list.append(test_accuracy)
+
+        print(
+            f"Epoch {epoch+1:02d} | "
+            f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f} | "
+            f"Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}"
+        )
+
+    plots.plot_loss_accuracy(train_loss_list, train_acc_list, "train.png")
+    plots.plot_loss_accuracy(test_loss_list, test_acc_list, "test.png")
