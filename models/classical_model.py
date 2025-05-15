@@ -40,6 +40,32 @@ def polynomial_features(X, degree):
 def train_polynomial_model(
     X, y, degree=2, epochs=100, lr=0.1, batch_size=16, config=None
 ):
+    """
+    Train a polynomial model using the given data and hyperparameters.
+
+    Parameters
+    ----------
+    X : torch.Tensor
+        The input data.
+    y : torch.Tensor
+        The labels of the input data.
+    degree : int, optional
+        The degree of the polynomial features. Default is 2.
+    epochs : int, optional
+        The number of epochs to train the model. Default is 100.
+    lr : float, optional
+        The learning rate of the Adam optimizer. Default is 0.1.
+    batch_size : int, optional
+        The batch size of the DataLoader. Default is 16.
+    config : dict, optional
+        The configuration dictionary.
+
+    Returns
+    -------
+    model : nn.Module
+        The trained polynomial model.
+    """
+
     X_poly = polynomial_features(X, degree)
 
     # --- Split into training and test sets
@@ -103,11 +129,11 @@ def train_polynomial_model(
             test_loss_list.append(avg_test_loss)
             test_acc_list.append(test_accuracy)
 
-        print(
-            f"Epoch {epoch+1:02d} | "
-            f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f} | "
-            f"Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}"
-        )
+        # print(
+        #     f"Epoch {epoch+1:02d} | "
+        #     f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f} | "
+        #     f"Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}"
+        # )
 
     plots.plot_loss_accuracy_comparison(
         train_loss_list, train_acc_list, test_loss_list, test_acc_list, config

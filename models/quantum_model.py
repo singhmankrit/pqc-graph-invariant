@@ -47,7 +47,7 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
 
         Returns
         -------
-        expectation value of PauliZ on the first qubit
+        expectation value of PauliZ tensored on the all qubits
         """
         for l in range(depth):
             gamma = gammas[l] if use_encoding_param else 1.0
@@ -183,11 +183,11 @@ def train_quantum_model(
         test_loss_list.append(avg_test_loss)
         test_acc_list.append(test_accuracy)
 
-        print(
-            f"Epoch {epoch+1:02d} | "
-            f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f} | "
-            f"Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}"
-        )
+        # print(
+        #     f"Epoch {epoch+1:02d} | "
+        #     f"Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f} | "
+        #     f"Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}"
+        # )
 
     plots.plot_loss_accuracy_comparison(
         train_loss_list, train_acc_list, test_loss_list, test_acc_list, config
