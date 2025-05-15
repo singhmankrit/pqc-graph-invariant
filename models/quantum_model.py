@@ -76,6 +76,7 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
         for i in range(1, n_qubits):
             operator = operator @ qml.PauliZ(i)
         return qml.expval(operator)
+        # return sum(qml.expval(qml.PauliZ(i)) for i in range(n_qubits)) / n_qubits
 
     return circuit
 
