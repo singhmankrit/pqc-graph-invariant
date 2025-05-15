@@ -3,7 +3,7 @@ import pennylane as qml
 import matplotlib.pyplot as plt
 
 
-def plot_loss_accuracy(loss_list, acc_list):
+def plot_loss_accuracy(loss_list, acc_list, name="plots.png"):
     """
     Plot the loss and accuracy of the model during training.
 
@@ -34,7 +34,7 @@ def plot_loss_accuracy(loss_list, acc_list):
     plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig("plots.png")
+    plt.savefig(name)
 
 
 def plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param=False):
