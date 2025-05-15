@@ -1,6 +1,7 @@
 import pennylane as qml
 import torch
 import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
 
 import plots
 
@@ -66,38 +67,49 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
                 elif variational_ansatz == "rx_ry":
                     qml.RX(thetas[l][0], wires=i)
                     qml.RY(thetas[l][1], wires=i)
+                elif variational_ansatz == "rx_ry_rz":
+                    qml.RX(thetas[l][0], wires=i)
+                    qml.RY(thetas[l][1], wires=i)
+                    qml.RZ(thetas[l][2], wires=i)
 
         operator = qml.PauliZ(0)
         for i in range(1, n_qubits):
             operator = operator @ qml.PauliZ(i)
         return qml.expval(operator)
+        # return sum(qml.expval(qml.PauliZ(i)) for i in range(n_qubits)) / n_qubits
 
     return circuit
 
 
-def train_quantum_model(qnode, thetas, gammas, learning_rate, epochs, loader):
+def train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size):
     """
-    Train the quantum model on given dataset.
+    Train a quantum model using the given data and hyperparameters.
 
     Parameters
     ----------
+    X : torch.Tensor
+        The input data.
+    y : torch.Tensor
+        The labels of the input data.
     qnode : function
-        A Pennylane QNode that implements the quantum circuit.
-    thetas : torch.nn.Parameter
+        The Pennylane QNode to be trained.
+    thetas : torch.Tensor
         The parameters of the variational ansatz.
-    gammas : torch.nn.Parameter
+    gammas : torch.Tensor, optional
         The parameters of the encoding. If not provided, will be set to 1.
     learning_rate : float
-        The learning rate of the optimizer.
+        The learning rate of the Adam optimizer.
     epochs : int
         The number of epochs to train the model.
-    loader : torch.utils.data.DataLoader
-        A DataLoader containing the dataset.
+    batch_size : int
+        The batch size of the DataLoader.
 
     Returns
     -------
     None
     """
+    dataset = TensorDataset(X, y)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     optimizer = torch.optim.Adam(
         [thetas] + ([gammas] if gammas is not None else []), lr=learning_rate
