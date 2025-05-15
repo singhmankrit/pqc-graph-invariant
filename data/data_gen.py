@@ -39,7 +39,7 @@ def generate_graph_data(n_graphs=100, n_nodes=4, p_edge=0.5, seed=42):
     return np.array(graphs), np.array(labels)
 
 
-def save_data(graphs, labels, filename="graph_data.npz"):
+def save_data(graphs, labels, filename="data/graph_data.npz"):
     """
     Save graph data and labels to a compressed .npz file.
 
@@ -55,7 +55,7 @@ def save_data(graphs, labels, filename="graph_data.npz"):
     np.savez_compressed(filename, graphs=graphs, labels=labels)
 
 
-def load_data(filename="graph_data.npz"):
+def load_data(filename="data/graph_data.npz"):
     """
     Load graph data and labels from a compressed .npz file.
 

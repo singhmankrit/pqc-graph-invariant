@@ -1,4 +1,8 @@
 import pennylane as qml
+import torch
+import torch.nn as nn
+
+import plots
 
 
 def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=False):
@@ -62,10 +66,73 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
                 elif variational_ansatz == "rx_ry":
                     qml.RX(thetas[l][0], wires=i)
                     qml.RY(thetas[l][1], wires=i)
-        
+
         operator = qml.PauliZ(0)
         for i in range(1, n_qubits):
             operator = operator @ qml.PauliZ(i)
         return qml.expval(operator)
 
     return circuit
+
+
+def train_quantum_model(qnode, thetas, gammas, learning_rate, epochs, loader):
+    """
+    Train the quantum model on given dataset.
+
+    Parameters
+    ----------
+    qnode : function
+        A Pennylane QNode that implements the quantum circuit.
+    thetas : torch.nn.Parameter
+        The parameters of the variational ansatz.
+    gammas : torch.nn.Parameter
+        The parameters of the encoding. If not provided, will be set to 1.
+    learning_rate : float
+        The learning rate of the optimizer.
+    epochs : int
+        The number of epochs to train the model.
+    loader : torch.utils.data.DataLoader
+        A DataLoader containing the dataset.
+
+    Returns
+    -------
+    None
+    """
+
+    optimizer = torch.optim.Adam(
+        [thetas] + ([gammas] if gammas is not None else []), lr=learning_rate
+    )
+    loss_fn = nn.BCELoss()
+
+    loss_list = []
+    acc_list = []
+
+    for epoch in range(epochs):
+        total_loss = 0
+        correct = 0
+        total = 0
+
+        for xb, yb in loader:
+            preds = []
+            for i in range(len(xb)):
+                out = qnode(xb[i].detach().numpy(), thetas, gammas)
+                preds.append(out)
+
+            preds = torch.sigmoid(torch.stack(preds).squeeze()).float()
+            loss = loss_fn(preds, yb)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+            predicted_labels = (preds > 0.5).float()
+            correct += (predicted_labels == yb).sum().item()
+            total += len(yb)
+
+        avg_loss = total_loss / len(loader)
+        accuracy = correct / total
+        loss_list.append(avg_loss)
+        acc_list.append(accuracy)
+        print(f"Epoch {epoch+1:02d}: Loss = {avg_loss:.4f}, Accuracy = {accuracy:.4f}")
+
+    plots.plot_loss_accuracy(loss_list, acc_list)

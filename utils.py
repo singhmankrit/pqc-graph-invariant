@@ -15,12 +15,13 @@ def parse_config(file_path: str):
     -------
     tuple
         A tuple of the configuration parameters in the following order:
-        n_graphs, n_nodes, batch_size, n_layers, learning_rate, epochs,
+        generate_data, n_graphs, n_nodes, batch_size, n_layers, learning_rate, epochs,
         variational_ansatz, use_encoding_param
     """
 
     with open(file_path) as file:
         config: dict[str, Any] = json.load(file)
+        generate_data: bool = config.get("generate_data", False)
         n_graphs: int = config.get("n_graphs", 200)
         n_nodes: int = config.get("n_nodes", 5)
         batch_size: int = config.get("batch_size", 16)
@@ -30,6 +31,7 @@ def parse_config(file_path: str):
         variational_ansatz: str = config.get("variational_ansatz", "rx")
         use_encoding_param: bool = config.get("use_encoding_param", False)
         return (
+            generate_data,
             n_graphs,
             n_nodes,
             batch_size,
