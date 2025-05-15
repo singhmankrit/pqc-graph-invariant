@@ -73,7 +73,9 @@ if ml_model == "quantum":
         use_encoding_param=use_encoding_param,
     )
 
-    train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size, config)
+    train_quantum_model(
+        X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size, config
+    )
 
     # plots.plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param)
 
@@ -83,7 +85,13 @@ elif ml_model == "classical":
     )  # flatten adjacency matrices
     y = torch.tensor(labels, dtype=torch.float32)
     model = train_polynomial_model(
-        X, y, degree=n_layers, epochs=epochs, lr=learning_rate, batch_size=batch_size, config=config
+        X,
+        y,
+        degree=n_layers,
+        epochs=epochs,
+        lr=learning_rate,
+        batch_size=batch_size,
+        config=config,
     )
 
 else:

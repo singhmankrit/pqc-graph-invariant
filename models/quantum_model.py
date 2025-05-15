@@ -80,7 +80,9 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
     return circuit
 
 
-def train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size, config):
+def train_quantum_model(
+    X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size, config
+):
     """
     Train a quantum model using the given data and hyperparameters.
 
@@ -188,7 +190,5 @@ def train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batc
         )
 
     plots.plot_loss_accuracy_comparison(
-        train_loss_list, train_acc_list,
-        test_loss_list, test_acc_list,
-        config
+        train_loss_list, train_acc_list, test_loss_list, test_acc_list, config
     )

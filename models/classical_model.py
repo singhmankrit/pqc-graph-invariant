@@ -37,7 +37,9 @@ def polynomial_features(X, degree):
     return features
 
 
-def train_polynomial_model(X, y, degree=2, epochs=100, lr=0.1, batch_size=16, config=None):
+def train_polynomial_model(
+    X, y, degree=2, epochs=100, lr=0.1, batch_size=16, config=None
+):
     X_poly = polynomial_features(X, degree)
 
     # --- Split into training and test sets
@@ -108,9 +110,7 @@ def train_polynomial_model(X, y, degree=2, epochs=100, lr=0.1, batch_size=16, co
         )
 
     plots.plot_loss_accuracy_comparison(
-        train_loss_list, train_acc_list,
-        test_loss_list, test_acc_list,
-        config
+        train_loss_list, train_acc_list, test_loss_list, test_acc_list, config
     )
 
     return model
