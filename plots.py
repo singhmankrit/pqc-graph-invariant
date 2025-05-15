@@ -1,12 +1,9 @@
 import networkx as nx
 import pennylane as qml
 import matplotlib.pyplot as plt
-import json
 
 
-def plot_loss_accuracy_comparison(
-    train_loss, train_acc, test_loss, test_acc, config
-):
+def plot_loss_accuracy_comparison(train_loss, train_acc, test_loss, test_acc, config):
     """
     Plot training and testing loss & accuracy, with a config box.
 
@@ -30,7 +27,7 @@ def plot_loss_accuracy_comparison(
 
     fig, axs = plt.subplots(1, 2, figsize=(12, 5))
 
-    # Loss plot
+    # Plot Loss
     axs[0].plot(train_loss, label="Train Loss", color="red")
     axs[0].plot(test_loss, label="Test Loss", color="green", linestyle="--")
     axs[0].set_xlabel("Epoch")
@@ -39,7 +36,7 @@ def plot_loss_accuracy_comparison(
     axs[0].grid(True)
     axs[0].legend()
 
-    # Accuracy plot
+    # Plot Accuracy
     axs[1].plot(train_acc, label="Train Accuracy", color="red")
     axs[1].plot(test_acc, label="Test Accuracy", color="green", linestyle="--")
     axs[1].set_xlabel("Epoch")
@@ -49,52 +46,59 @@ def plot_loss_accuracy_comparison(
     axs[1].grid(True)
     axs[1].legend()
 
-    # Add config box as text in the upper right
+    # Readable config block
     readable_config = [
-        "Configuration",
-        f"─" * 18,
-        f"Graphs: {config.get('n_graphs')}",
-        f"Nodes: {config.get('n_nodes')}",
-        f"Model: {config.get('ml_model').capitalize()}",
-        # f"Batch Size: {config.get('batch_size')}",
-        # f"Learning Rate: {config.get('learning_rate')}",
-        f"Epochs: {config.get('epochs')}",
+        "Training Configuration",
+        "─" * 24,
+        f"Graphs         : {config.get('n_graphs')}",
+        f"Nodes          : {config.get('n_nodes')}",
+        f"Batch Size     : {config.get('batch_size')}",
+        f"Learning Rate  : {config.get('learning_rate')}",
+        f"Epochs         : {config.get('epochs')}",
+        f"Model          : {config.get('ml_model').capitalize()}",
     ]
-    if (config.get("ml_model") == "quantum"):
-        readable_config.append(f"Layers: {config.get('n_layers')}")
-        readable_config.append(f"Ansatz: {config.get('variational_ansatz').upper()}")
-        readable_config.append(f"Encoding Param: {config.get('use_encoding_param')}")
+
+    # Add model-specific configs
+    if config.get("ml_model") == "quantum":
+        readable_config += [
+            f"Layers         : {config.get('n_layers')}",
+            f"Ansatz         : {config.get('variational_ansatz').upper()}",
+            f"Encoding Param : {config.get('use_encoding_param')}",
+        ]
     else:
-        readable_config.append(f"Degree: {config.get('n_layers')}")
+        readable_config += [
+            f"Degree         : {config.get('n_layers')}",
+        ]
 
     config_text = "\n".join(readable_config)
 
+    # Plot config box on the side
     fig.text(
         0.98,
         0.5,
         config_text,
         fontsize=10,
         va="center",
-        ha="right",
+        ha="left",
         family="monospace",
         bbox=dict(
             facecolor="whitesmoke",
             edgecolor="gray",
-            boxstyle="round,pad=1",
-            alpha=0.9,
+            boxstyle="round,pad=1.2",
+            alpha=0.95,
         ),
     )
 
-    plot_name = "".join([
-    "images/",
-    f"{config.get('ml_model')}_",
-    f"nodes_{config.get('n_nodes')}_",
-    f"layers_{config.get('n_layers')}_",
-    f"epochs_{config.get('epochs')}_",
-    f"ansatz_{config.get('variational_ansatz')}_",
-    f"param_{config.get('use_encoding_param')}_",
-    ".png"
-    ])
+    # Construct plot name safely and uniquely
+    model = config.get("ml_model")
+    base = f"{model}_nodes{config.get('n_nodes')}_layers{config.get('n_layers')}_epochs{config.get('epochs')}"
+
+    if model == "quantum":
+        extra = f"_ansatz_{config.get('variational_ansatz')}_param_{config.get('use_encoding_param')}"
+    else:
+        extra = ""
+
+    plot_name = f"images/{base}{extra}.png"
 
     plt.tight_layout(rect=[0, 0, 0.85, 1])
     plt.savefig(plot_name, bbox_inches="tight")
