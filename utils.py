@@ -15,7 +15,7 @@ def parse_config(file_path: str):
     -------
     tuple
         A tuple of the configuration parameters in the following order:
-        generate_data, n_graphs, n_nodes, batch_size, learning_rate, epochs, ml_model, pqc_layers,
+        generate_data, n_graphs, n_nodes, batch_size, learning_rate, n_layers, epochs, ml_model,
         variational_ansatz, use_encoding_param
     """
 
@@ -26,9 +26,9 @@ def parse_config(file_path: str):
         n_nodes: int = config.get("n_nodes", 5)
         batch_size: int = config.get("batch_size", 16)
         learning_rate: float = config.get("learning_rate", 0.1)
+        n_layers: int = config.get("n_layers", 3)
         epochs: int = config.get("epochs", 20)
         ml_model: str = config.get("ml_model", "quantum")
-        pqc_layers: int = config.get("pqc_layers", 3)
         variational_ansatz: str = config.get("variational_ansatz", "rx")
         use_encoding_param: bool = config.get("use_encoding_param", False)
         return (
@@ -37,9 +37,9 @@ def parse_config(file_path: str):
             n_nodes,
             batch_size,
             learning_rate,
+            n_layers,
             epochs,
             ml_model,
-            pqc_layers,
             variational_ansatz,
             use_encoding_param,
         )

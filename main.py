@@ -12,10 +12,10 @@ from data.data_gen import generate_graph_data, load_data, save_data
     n_nodes,
     batch_size,
     learning_rate,
+    n_layers,
     epochs,
     ml_model,
     # quantum model specific parameters
-    pqc_layers,
     variational_ansatz,
     use_encoding_param,
 ) = utils.parse_config("config.json")
@@ -43,23 +43,23 @@ if ml_model == "quantum":
 
     # Quantum Model Parameters
     if variational_ansatz == "rx":
-        thetas = torch.nn.Parameter(torch.randn(pqc_layers, requires_grad=True))
+        thetas = torch.nn.Parameter(torch.randn(n_layers, requires_grad=True))
     elif variational_ansatz == "rx_ry":
-        thetas = torch.nn.Parameter(torch.randn(pqc_layers, 2, requires_grad=True))
+        thetas = torch.nn.Parameter(torch.randn(n_layers, 2, requires_grad=True))
     elif variational_ansatz == "rx_ry_rz":
-        thetas = torch.nn.Parameter(torch.randn(pqc_layers, 3, requires_grad=True))
+        thetas = torch.nn.Parameter(torch.randn(n_layers, 3, requires_grad=True))
     else:
         raise ValueError(f"Invalid variational ansatz: {variational_ansatz}")
 
     if use_encoding_param:
-        gammas = torch.nn.Parameter(torch.ones(pqc_layers, requires_grad=True))
+        gammas = torch.nn.Parameter(torch.ones(n_layers, requires_grad=True))
     else:
         gammas = None
 
     # Model setup
     qnode = create_qnode(
         n_nodes,
-        depth=pqc_layers,
+        depth=n_layers,
         variational_ansatz=variational_ansatz,
         use_encoding_param=use_encoding_param,
     )
@@ -71,8 +71,7 @@ if ml_model == "quantum":
 elif ml_model == "classical":
     X = torch.tensor(graphs, dtype=torch.float32).reshape(len(graphs), -1)  # flatten adjacency matrices
     y = torch.tensor(labels, dtype=torch.float32)
-    degree = 2  # or 3 for comparison with quantum circuit depth
-    model = train_polynomial_model(X, y, degree=degree, epochs=100)
+    model = train_polynomial_model(X, y, degree=n_layers, epochs=epochs, lr=learning_rate, batch_size=batch_size)
 
 else:
     raise ValueError(f"Invalid ML model: {ml_model}")
