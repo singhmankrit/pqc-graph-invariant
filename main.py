@@ -19,6 +19,18 @@ from data.data_gen import generate_graph_data, load_data, save_data
     use_encoding_param,
 ) = utils.parse_config("config.json")
 
+config = {
+    "n_graphs": n_graphs,
+    "n_nodes": n_nodes,
+    "batch_size": batch_size,
+    "learning_rate": learning_rate,
+    "n_layers": n_layers,
+    "epochs": epochs,
+    "ml_model": ml_model,
+    "variational_ansatz": variational_ansatz,
+    "use_encoding_param": use_encoding_param,
+}
+
 # Data
 if generate_data:
     graphs, labels = generate_graph_data(n_graphs, n_nodes)
@@ -61,7 +73,7 @@ if ml_model == "quantum":
         use_encoding_param=use_encoding_param,
     )
 
-    train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size)
+    train_quantum_model(X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size, config)
 
     # plots.plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param)
 
@@ -71,7 +83,7 @@ elif ml_model == "classical":
     )  # flatten adjacency matrices
     y = torch.tensor(labels, dtype=torch.float32)
     model = train_polynomial_model(
-        X, y, degree=n_layers, epochs=epochs, lr=learning_rate, batch_size=batch_size
+        X, y, degree=n_layers, epochs=epochs, lr=learning_rate, batch_size=batch_size, config=config
     )
 
 else:

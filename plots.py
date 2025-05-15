@@ -1,40 +1,104 @@
 import networkx as nx
 import pennylane as qml
 import matplotlib.pyplot as plt
+import json
 
 
-def plot_loss_accuracy(loss_list, acc_list, name="plots.png"):
+def plot_loss_accuracy_comparison(
+    train_loss, train_acc, test_loss, test_acc, config
+):
     """
-    Plot the loss and accuracy of the model during training.
+    Plot training and testing loss & accuracy, with a config box.
 
     Parameters
     ----------
-    loss_list : list
-        A list of loss values at each epoch.
-    acc_list : list
-        A list of accuracy values at each epoch.
+    train_loss : list
+        Training loss per epoch
+    train_acc : list
+        Training accuracy per epoch
+    test_loss : list
+        Test loss per epoch
+    test_acc : list
+        Test accuracy per epoch
+    config : dict
+        Dictionary of configuration values (e.g., n_nodes, learning_rate, etc.)
 
     Returns
     -------
     None
     """
 
-    plt.figure(figsize=(10, 4))
-    plt.subplot(1, 2, 1)
-    plt.plot(loss_list, label="Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.grid(True)
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
 
-    plt.subplot(1, 2, 2)
-    plt.plot(acc_list, label="Accuracy", color="green")
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy")
-    plt.ylim(0, 1)
-    plt.grid(True)
+    # Loss plot
+    axs[0].plot(train_loss, label="Train Loss", color="red")
+    axs[0].plot(test_loss, label="Test Loss", color="green", linestyle="--")
+    axs[0].set_xlabel("Epoch")
+    axs[0].set_ylabel("Loss")
+    axs[0].set_title("Loss")
+    axs[0].grid(True)
+    axs[0].legend()
 
-    plt.tight_layout()
-    plt.savefig(name)
+    # Accuracy plot
+    axs[1].plot(train_acc, label="Train Accuracy", color="red")
+    axs[1].plot(test_acc, label="Test Accuracy", color="green", linestyle="--")
+    axs[1].set_xlabel("Epoch")
+    axs[1].set_ylabel("Accuracy")
+    axs[1].set_ylim(0, 1)
+    axs[1].set_title("Accuracy")
+    axs[1].grid(True)
+    axs[1].legend()
+
+    # Add config box as text in the upper right
+    readable_config = [
+        "Configuration",
+        f"─" * 18,
+        f"Graphs: {config.get('n_graphs')}",
+        f"Nodes: {config.get('n_nodes')}",
+        f"Model: {config.get('ml_model').capitalize()}",
+        # f"Batch Size: {config.get('batch_size')}",
+        # f"Learning Rate: {config.get('learning_rate')}",
+        f"Epochs: {config.get('epochs')}",
+    ]
+    if (config.get("ml_model") == "quantum"):
+        readable_config.append(f"Layers: {config.get('n_layers')}")
+        readable_config.append(f"Ansatz: {config.get('variational_ansatz').upper()}")
+        readable_config.append(f"Encoding Param: {config.get('use_encoding_param')}")
+    else:
+        readable_config.append(f"Degree: {config.get('n_layers')}")
+
+    config_text = "\n".join(readable_config)
+
+    fig.text(
+        0.98,
+        0.5,
+        config_text,
+        fontsize=10,
+        va="center",
+        ha="right",
+        family="monospace",
+        bbox=dict(
+            facecolor="whitesmoke",
+            edgecolor="gray",
+            boxstyle="round,pad=1",
+            alpha=0.9,
+        ),
+    )
+
+    plot_name = "".join([
+    "images/",
+    f"{config.get('ml_model')}_",
+    f"nodes_{config.get('n_nodes')}_",
+    f"layers_{config.get('n_layers')}_",
+    f"epochs_{config.get('epochs')}_",
+    f"ansatz_{config.get('variational_ansatz')}_",
+    f"param_{config.get('use_encoding_param')}_",
+    ".png"
+    ])
+
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
+    plt.savefig(plot_name, bbox_inches="tight")
+    plt.close()
 
 
 def plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param=False):
