@@ -3,12 +3,12 @@ from torch.utils.data import TensorDataset, DataLoader
 
 import utils, plots
 from models.quantum_model import create_qnode, train_quantum_model
-from data.data_gen import generate_graph_data
+from data.data_gen import generate_graph_data, load_data
 
 (
     generate_data,
     n_graphs,
-    n_nodes, # used only when generating new graph data
+    n_nodes,  # used only when generating new graph data
     batch_size,
     n_layers,
     learning_rate,
@@ -21,10 +21,10 @@ from data.data_gen import generate_graph_data
 if generate_data:
     graphs, labels = generate_graph_data(n_graphs, n_nodes)
 else:
-    graphs, labels = utils.load_data("graph_data.npz")
+    graphs, labels = load_data("data/graph_data.npz")
     if graphs.shape[0] != n_graphs or labels.shape[0] != n_graphs:
         raise ValueError(
-            f"Number of graphs in data ({graphs.shape[0]}) does not match n_graphs ({n_graphs})."
+            f"Number of graphs in saved data ({graphs.shape[0]}) does not match config input n_graphs ({n_graphs})."
         )
 
 X = torch.tensor(graphs, dtype=torch.float32)
