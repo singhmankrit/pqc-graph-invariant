@@ -1,10 +1,8 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
-import matplotlib.pyplot as plt
-import pennylane as qml
 
-import utils
+import utils, plots
 from models.quantum_model import create_qnode
 from data.data_gen import generate_graph_data
 
@@ -46,16 +44,6 @@ if use_encoding_param:
 else:
     gammas = None
 
-# Just visualising the circuit
-adj_matrix_sample = graphs[0]
-if use_encoding_param:
-    gammas_sample = gammas.detach()
-else:
-    gammas_sample = None
-
-qml.draw_mpl(qnode)(adj_matrix_sample, thetas, gammas_sample)
-plt.savefig("circuit.png")
-
 optimizer = torch.optim.Adam(
     [thetas] + ([gammas] if gammas is not None else []), lr=learning_rate
 )
@@ -92,20 +80,5 @@ for epoch in range(epochs):
     acc_list.append(accuracy)
     print(f"Epoch {epoch+1:02d}: Loss = {avg_loss:.4f}, Accuracy = {accuracy:.4f}")
 
-# Plot
-plt.figure(figsize=(10, 4))
-plt.subplot(1, 2, 1)
-plt.plot(loss_list, label="Loss")
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.grid(True)
-
-plt.subplot(1, 2, 2)
-plt.plot(acc_list, label="Accuracy", color="green")
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy")
-plt.ylim(0, 1)
-plt.grid(True)
-
-plt.tight_layout()
-plt.savefig("plots.png")
+plots.plot_circuit(graphs, thetas, gammas, qnode, use_encoding_param)
+plots.plot_loss_accuracy(loss_list, acc_list)
