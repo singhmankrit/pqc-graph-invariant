@@ -1,15 +1,15 @@
 import torch
-import utils, plots
+
 from models.classical_model import train_polynomial_model
 from models.quantum_model import create_qnode, train_quantum_model
-from data.data_gen import generate_graph_data, load_data, save_data
+from utils import parse_config, generate_or_load_data
 
-all_configs = utils.parse_config("config.json")
+config_list = parse_config("config.json")
 
-for config in all_configs:
-    print(f"\nRunning with config: {config}")
+# Store which Classical Configs run
+classical_configs_run = set()
 
-    # Unpack config values
+for config in config_list:
     generate_data = config["generate_data"]
     n_graphs = config["n_graphs"]
     n_nodes = config["n_nodes"]
@@ -18,43 +18,47 @@ for config in all_configs:
     n_layers = config["n_layers"]
     epochs = config["epochs"]
     ml_model = config["ml_model"]
-    variational_ansatz = config.get("variational_ansatz")
-    use_encoding_param = config.get("use_encoding_param")
 
-    # === SKIP incompatible parameter combinations ===
-    if ml_model == "classical" and (
-        variational_ansatz is not None or use_encoding_param is not None
-    ):
-        print(
-            f"⚠️ Skipping config: classical model should not specify quantum-only parameters "
-            f"(variational_ansatz: {variational_ansatz}, use_encoding_param: {use_encoding_param})"
+    # Load data
+    graphs, labels = generate_or_load_data(n_graphs, n_nodes, generate_data)
+
+    # For classical model, skip if we've already run this configuration
+    if ml_model == "classical":
+        classical_config_key = (
+            n_graphs,
+            n_nodes,
+            batch_size,
+            learning_rate,
+            n_layers,
+            epochs,
         )
-        continue
 
-    if ml_model == "quantum" and (
-        variational_ansatz is None or use_encoding_param is None
-    ):
-        print(
-            f"⚠️ Skipping config: quantum model requires 'variational_ansatz' and 'use_encoding_param'."
+        if classical_config_key in classical_configs_run:
+            print(f"Skipping duplicate classical model run with config: {config}")
+            continue
+
+        classical_configs_run.add(classical_config_key)
+
+        # Run the classical model
+        print(f"\nRunning classical model with config: {config}")
+        X = torch.tensor(graphs, dtype=torch.float32).reshape(len(graphs), -1)
+        y = torch.tensor(labels, dtype=torch.float32)
+
+        model = train_polynomial_model(
+            X,
+            y,
+            degree=n_layers,
+            epochs=epochs,
+            lr=learning_rate,
+            batch_size=batch_size,
+            config=config,
         )
-        continue
 
-    # Data
-    if generate_data:
-        graphs, labels = generate_graph_data(n_graphs, n_nodes)
-        save_data(graphs, labels, n_nodes)
-    else:
-        graphs, labels, load_n_nodes = load_data()
-        if graphs.shape[0] != n_graphs or labels.shape[0] != n_graphs:
-            raise ValueError(
-                f"Saved graphs ({graphs.shape[0]}) do not match config n_graphs ({n_graphs})"
-            )
-        if n_nodes != load_n_nodes:
-            raise ValueError(
-                f"Saved node count ({load_n_nodes}) does not match config n_nodes ({n_nodes})"
-            )
+    elif ml_model == "quantum":
+        variational_ansatz = config.get("variational_ansatz")
+        use_encoding_param = config.get("use_encoding_param")
 
-    if ml_model == "quantum":
+        print(f"\nRunning quantum model with config: {config}")
         X = torch.tensor(graphs, dtype=torch.float32)
         y = torch.tensor(labels, dtype=torch.float32)
 
@@ -83,20 +87,5 @@ for config in all_configs:
         train_quantum_model(
             X, y, qnode, thetas, gammas, learning_rate, epochs, batch_size, config
         )
-
-    elif ml_model == "classical":
-        X = torch.tensor(graphs, dtype=torch.float32).reshape(len(graphs), -1)
-        y = torch.tensor(labels, dtype=torch.float32)
-
-        model = train_polynomial_model(
-            X,
-            y,
-            degree=n_layers,
-            epochs=epochs,
-            lr=learning_rate,
-            batch_size=batch_size,
-            config=config,
-        )
-
     else:
         raise ValueError(f"Invalid ML model: {ml_model}")
