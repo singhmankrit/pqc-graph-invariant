@@ -86,7 +86,7 @@ def visually_verify_graphs(graphs, labels, num_to_plot=5):
 
     Notes
     -----
-    For each graph, a plot is created and saved as an image file named 'fig-{i}.png',
+    For each graph, a plot is created and saved as an image file named 'graph-{i}.png',
     where 'i' is the index of the graph.
     """
 
@@ -100,4 +100,4 @@ def visually_verify_graphs(graphs, labels, num_to_plot=5):
         plt.figure(figsize=(3, 3))
         nx.draw(G, with_labels=True, node_color="lightblue", edge_color="gray")
         print(f"Graph {i}, Label: {label}")
-        plt.savefig(f"fig-{i}.png")
+        plt.savefig(f"graph-{i}.png")
