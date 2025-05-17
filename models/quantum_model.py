@@ -77,12 +77,9 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
                     qml.RZ(thetas[l][2], wires=i)
                     
             if variational_ansatz == "rx_ry_rz_ising":
-                for i in range(len(adj_matrix)):
-                    for j in range(i + 1, len(adj_matrix)):
-                        if adj_matrix[i, j] == 1:
-                            qml.IsingZZ(
-                                thetas[l][3], wires=[i, j]
-                            ) 
+                for i in range(n_qubits):
+                    for j in range(i + 1, n_qubits):
+                        qml.IsingZZ(thetas[l][3], wires=[i, j])
 
 
         operator = qml.PauliZ(0)
