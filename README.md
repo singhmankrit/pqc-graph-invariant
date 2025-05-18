@@ -8,27 +8,26 @@ This project compares classical and quantum machine learning models for learning
 The script will:
 - Load or generate graph data
 - Train both classical and quantum models (depending on config)
-- Save performance plots to the images/ directory
-- A plot of training and test loss/accuracy
-- Annotated configuration box in the corner
+- Plot training and test loss/accuracy with an annotated configuration box in the corner
+- Save performance plots to the `images/` directory
 
 ## 📁 Project Structure
 ```bash
 ├── data/
-│ └── data_gen.py # Graph Data Generation code
+│ └── data_gen.py # Graph data generation code
 ├── models/
 │ ├── classical_model.py # Classical polynomial model
 │ └── quantum_model.py # Quantum model with Pennylane
 ├── utils.py # Config parser and helper functions
-├── plots.py # Training plots and circuit visualization
-├── main.py # Entry point for training/evaluation
+├── plots.py # Plot results and visualise circuit
 ├── config.json # Configuration file (grid of settings)
-└── README.md # This file
+├── main.py
+└── README.md
 ```
 
 ## ⚙️ Configuration
 
-All experiments are controlled through the `config.json` file. Multiple values in a list mean different iterations code being run using each config. The following parameters can be set:
+All experiments are controlled through the `config.json` file. Multiple values in a list mean different iterations of execution will be done using each config. The following parameters can be set:
 
 | Option | Default | Description |
 | ------ | ------- | ----------- |
@@ -37,7 +36,7 @@ All experiments are controlled through the `config.json` file. Multiple values i
 | n_nodes | `[4, 5, 6, 7, 8, 9]` | Number of nodes generated in the graph. |
 | batch_size | `[16]` | Batch size for training the model. |
 | learning_rate | `[0.1]` | Learning rate for the model. |
-| n_layers | `[1, 2, 3, 4, 5]` | For Quantum, this is the number of layers of data encoding and variational circuit. For Classical, this is the degree of the polynomial. |
+| n_layers | `[1, 2, 3, 4, 5]` | For Quantum, this is the number of layers of data encoding and variational circuit. For Classical, this is the degree of the multivariate polynomial. |
 | epochs | `[20, 50]` | Number of epochs for the model to train. |
 | ml_model | `["classical", "quantum"]` | Chooses which model to train on. |
 | variational_ansatz | `["rx", "rx_ry", "rx_ry_rz", "rx_ry_rz_ising"]` | (Quantum only) Chooses which ansatz to train on, including the proposed `rx_ry_rz_ising` ansatz. |
