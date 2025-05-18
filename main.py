@@ -68,6 +68,8 @@ for i, config in enumerate(config_list, 1):
             thetas = torch.nn.Parameter(torch.randn(n_layers, 2, requires_grad=True))
         elif variational_ansatz == "rx_ry_rz":
             thetas = torch.nn.Parameter(torch.randn(n_layers, 3, requires_grad=True))
+        elif variational_ansatz == "rx_ry_rz_ising":
+            thetas = torch.nn.Parameter(torch.randn(n_layers, 4, requires_grad=True))
         else:
             raise ValueError(f"Invalid variational ansatz: {variational_ansatz}")
 

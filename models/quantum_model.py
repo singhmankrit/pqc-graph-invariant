@@ -71,6 +71,16 @@ def create_qnode(n_qubits, depth=2, variational_ansatz="rx", use_encoding_param=
                     qml.RX(thetas[l][0], wires=i)
                     qml.RY(thetas[l][1], wires=i)
                     qml.RZ(thetas[l][2], wires=i)
+                elif variational_ansatz == "rx_ry_rz_ising":
+                    qml.RX(thetas[l][0], wires=i)
+                    qml.RY(thetas[l][1], wires=i)
+                    qml.RZ(thetas[l][2], wires=i)
+                    
+            if variational_ansatz == "rx_ry_rz_ising":
+                for i in range(n_qubits):
+                    for j in range(i + 1, n_qubits):
+                        qml.IsingZZ(thetas[l][3], wires=[i, j])
+
 
         operator = qml.PauliZ(0)
         for i in range(1, n_qubits):
