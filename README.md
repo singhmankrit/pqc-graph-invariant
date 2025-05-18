@@ -5,8 +5,15 @@ This project compares classical and quantum machine learning models for learning
 - Classical multivariate polynomial classifiers
 - Quantum data re-uploading models using different variational ansätze
 
+The script will:
+- Load or generate graph data
+- Train both classical and quantum models (depending on config)
+- Save performance plots to the images/ directory
+- A plot of training and test loss/accuracy
+- Annotated configuration box in the corner
+
 ## 📁 Project Structure
-.
+```bash
 ├── data/
 │ └── data_gen.py # Graph Data Generation code
 ├── models/
@@ -17,16 +24,16 @@ This project compares classical and quantum machine learning models for learning
 ├── main.py # Entry point for training/evaluation
 ├── config.json # Configuration file (grid of settings)
 └── README.md # This file
-
+```
 
 ## ⚙️ Configuration
 
-All experiments are controlled through the `config.json` file. The following parameters can be set:
+All experiments are controlled through the `config.json` file. Multiple values in a list mean different iterations code being run using each config. The following parameters can be set:
 
 | Option | Default | Description |
 | ------ | ------- | ----------- |
 | generate_data | `[false]` | Controls whether the graph data is regenerated or reused from a previous run. |
-| n_graphs | `[200, 600]` | Number of graphs generated using the Erdős–Rényi model. Multiple values in a list mean different iterations code being run using each config. |
+| n_graphs | `[200, 600]` | Number of graphs generated using the Erdős–Rényi model. |
 | n_nodes | `[4, 5, 6, 7, 8, 9]` | Number of nodes generated in the graph. |
 | batch_size | `[16]` | Batch size for training the model. |
 | learning_rate | `[0.1]` | Learning rate for the model. |
