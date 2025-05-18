@@ -18,6 +18,7 @@ The script will:
 ├── models/
 │ ├── classical_model.py # Classical polynomial model
 │ └── quantum_model.py # Quantum model with Pennylane
+├── images/ # Results generated across different runs
 ├── utils.py # Config parser and helper functions
 ├── plots.py # Plot results and visualise circuit
 ├── config.json # Configuration file (grid of settings)
